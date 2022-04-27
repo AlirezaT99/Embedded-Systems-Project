@@ -2,7 +2,12 @@
 <div dir="rtl"> 
   <h1 align="center">
     موضوع پروژه: آینه هوشمند
-  </h1>
+  </h1> 
+  <h3 align="center">
+    <a href="https://docs.google.com/presentation/d/1yEfrLRtQidNFPOzYvGMPAZY4kbuq4YcQoiiEx9RgArc/edit?usp=sharing">
+    اسلاید ارائه
+    </a>
+  </h3>
   
   <h3 align="center">
      
