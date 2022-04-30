@@ -7,6 +7,10 @@
     <a href="https://docs.google.com/presentation/d/1yEfrLRtQidNFPOzYvGMPAZY4kbuq4YcQoiiEx9RgArc/edit?usp=sharing">
     اسلاید ارائه
     </a>
+    +
+    <a href="https://github.com/Sharif-Embedded-system/final_project-tajmirriahi-heydari-mohammadian/issues/2">
+      ویژگی‌های اضافه
+    </a>
   </h3>
   
   <h3 align="center">
