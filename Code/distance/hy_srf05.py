@@ -3,12 +3,14 @@ import time
 import statistics
 
 
+TRIGGER_PIN = 18  # is set to high to send out a wave (OUT)
+ECHO_PIN = 17  # indicates a returning wave when set to high (IN)
+
+
 # TODO precision vs. load on the device
 no_of_samples = 5  # number of trials to picks the middle value from and return
-sample_sleep = 0.5  # interval between sending sample requests.
+sample_sleep = 0.2  # interval between sending sample requests.
 
-trigger_pin = 18  # is set to high to send out a wave (OUT)
-echo_pin = 17  # indicates a returning wave when set to high (IN)
 calibration1 = 30  # the distance the sensor was calibrated at
 calibration2 = 1750  # the median value reported back from the sensor at 30 cm
 time_out = 0.05  # measured in seconds in case the program gets stuck in a loop
@@ -16,8 +18,8 @@ time_out = 0.05  # measured in seconds in case the program gets stuck in a loop
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(trigger_pin, GPIO.OUT)
-GPIO.setup(echo_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(TRIGGER_PIN, GPIO.OUT)
+GPIO.setup(ECHO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 samples_list = []
 stack = []
@@ -29,9 +31,9 @@ def timer_call(channel) :
 
 
 def trigger():
-    GPIO.output(trigger_pin, GPIO.HIGH) 
+    GPIO.output(TRIGGER_PIN, GPIO.HIGH) 
     time.sleep(0.00001)  # send out a 10us long pulse
-    GPIO.output(trigger_pin, GPIO.LOW)
+    GPIO.output(TRIGGER_PIN, GPIO.LOW)
 
 
 def check_distance():
@@ -58,7 +60,7 @@ def check_distance():
     return statistics.median(samples_list) * 1e6 * calibration1 / calibration2
 
 
-GPIO.add_event_detect(echo_pin, GPIO.BOTH, callback=timer_call)
+GPIO.add_event_detect(ECHO_PIN, GPIO.BOTH, callback=timer_call)
 
 while True:
     print(round(check_distance(), 1))
