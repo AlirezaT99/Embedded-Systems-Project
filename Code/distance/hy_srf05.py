@@ -4,10 +4,11 @@ import statistics
 
 
 # TODO precision vs. load on the device
+no_of_samples = 5  # number of trials to picks the middle value from and return
+sample_sleep = 0.5  # interval between sending sample requests.
+
 trigger_pin = 18  # is set to high to send out a wave (OUT)
 echo_pin = 17  # indicates a returning wave when set to high (IN)
-no_of_samples = 5  # number of trials to picks the middle value from and return
-sample_sleep = 0.01  # interval between sending sample requests.
 calibration1 = 30  # the distance the sensor was calibrated at
 calibration2 = 1750  # the median value reported back from the sensor at 30 cm
 time_out = 0.05  # measured in seconds in case the program gets stuck in a loop
