@@ -1,0 +1,15 @@
+DHT22 - Humidity & Temperature
+	- VCC		2
+	- GND		6
+	- data	7 (GPIO 4)
+	
+SRF05 - Ultrasonic Distance
+	- VCC		4
+	- Trig	12 (GPIO 18)
+	- Echo	11 (GPIO 17)
+	- GND		9
+
+KY038 - Sound Sensor
+	- G		25
+	- +		1 (3v3)
+	- DO		18 (GPIO 24)
