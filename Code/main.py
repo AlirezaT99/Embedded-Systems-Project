@@ -1,6 +1,8 @@
 import Adafruit_DHT
+import asyncio
 import cv2
 import psutil
+import python_weather
 import RPi.GPIO as GPIO
 import threading
 import time
@@ -12,7 +14,10 @@ from sound.ky038 import SOUND_CHANNEL
 
 
 VIDEO_URL = 'http://192.168.1.4:4747/video'
+LOCATION = 'Tehran, Tehran Province, Iran'
 DISTANCE_THRESHOLD = 40  # cm
+SOUND_GAP = 2
+
 DEBUG = True
 
 
@@ -22,6 +27,7 @@ humidity = ''
 weather_forecast = {}
 distance = -1
 mirror_mode = True
+sound_stack = []
 
 
 def dprint(msg):
@@ -42,7 +48,7 @@ def env_thread():
         sensor_humidity, sensor_temperature = Adafruit_DHT.read(DHT_SENSOR, DHT_PIN)
         if sensor_humidity is not None and sensor_temperature is not None:
             dprint('{} {}'.format(temperature, humidity))
-            temperature = '{0:0.1f}C' % sensor_temperature
+            temperature = '{0:0.1f}°C' % sensor_temperature
             humidity = '{1:0.1f}%' % sensor_humidity
         else:
             dprint('DHT22 Sensor failure. Check wiring.')
@@ -61,24 +67,58 @@ def is_object_nearby():
     return distance != -1 and float(distance) < DISTANCE_THRESHOLD
 
 
+async def get_weather(city):
+    client = python_weather.Client(format=python_weather.METRIC)
+    weather = await client.find(city)
+    # print(weather.current.temperature)
+    weather_forecast.clear()
+    for forecast in weather.forecasts:
+        weather_forecast[str(forecast.date)] = (forecast.sky_text, forecast.temperature)
+    await client.close()
+
+
 def set_weather_forecast():
-    pass  # TODO
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(get_weather(LOCATION))
+    if len(weather_forecast) == 0:
+        set_weather_forecast()
 
 
-def sound_callback(channel):  # TODO look for a pattern
-    if GPIO.input(channel):
-        print('Sound detected')
+def sound_callback(channel):
+    now = time.monotonic()
+    if len(sound_stack) == 1:
+        if sound_stack[0] < now - SOUND_GAP:
+            sound_stack[0] = now
+        else:
+            mirror_mode = not mirror_mode
+        sound_stack.clear()
     else:
-        print('Sound detected')
+        sound_stack.append(now)
+
+    # if GPIO.input(channel):
+    #     sound_stack.append(now)
+    # else:
+    #     sound_stack.append(now)
+    print('Sound detected')
+
+
+def write_stuff_on_image(image, base_y, base_x):
+    if len(weather_forecast) == 0:
+        return cv2.putText(img=image, text="Hello User!", org=(base_y, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 0, 0), thickness=2)
+    cv2.putText(img=image, text="Weather forecast:", org=(base_y, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 0, 0), thickness=2)
+    for i, date in enumerate(weather_forecast.keys()):
+        cv2.putText(img=image, text=f"{date}: {weather_forecast[date][1]}°C\t{weather_forecast[date][0]}", org=(base_y + i * 100, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=2, color=(0, 0, 0), thickness=2)
+        if i == 3:
+            break
+    return image
 
 
 def style_background(image):
-    cv2.putText(img=image, text="Hello World", org=(100, 200), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 0, 0), thickness=2)
-    return image
+    return write_stuff_on_image(image, 400, 400)
 
 
 def style_video_frame(image):
-    return image
+    return write_stuff_on_image(image, 100, 200)
 
 
 def run():
@@ -108,7 +148,8 @@ def run():
     # Environment sensor (DHT22)
     threading.Thread(target=env_thread).start()
 
-    set_weather_forecast()
+    # Weather forecast
+    threading.Thread(target=set_weather_forecast).start()
 
     while True:
         try:
