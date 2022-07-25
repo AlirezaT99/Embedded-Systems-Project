@@ -2,7 +2,7 @@ import Adafruit_DHT
 import asyncio
 import cv2
 import psutil
-import python_weather
+# import python_weather
 import RPi.GPIO as GPIO
 import threading
 import time
@@ -67,21 +67,21 @@ def is_object_nearby():
     return distance != -1 and float(distance) < DISTANCE_THRESHOLD
 
 
-async def get_weather(city):
-    client = python_weather.Client(format=python_weather.METRIC)
-    weather = await client.find(city)
-    # print(weather.current.temperature)
-    weather_forecast.clear()
-    for forecast in weather.forecasts:
-        weather_forecast[str(forecast.date)] = (forecast.sky_text, forecast.temperature)
-    await client.close()
+# async def get_weather(city):
+#     client = python_weather.Client(format=python_weather.METRIC)
+#     weather = await client.find(city)
+#     # print(weather.current.temperature)
+#     weather_forecast.clear()
+#     for forecast in weather.forecasts:
+#         weather_forecast[str(forecast.date)] = (forecast.sky_text, forecast.temperature)
+#     await client.close()
 
 
-def set_weather_forecast():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(get_weather(LOCATION))
-    if len(weather_forecast) == 0:
-        set_weather_forecast()
+# def set_weather_forecast():
+#     loop = asyncio.get_event_loop()
+#     loop.run_until_complete(get_weather(LOCATION))
+#     if len(weather_forecast) == 0:
+#         set_weather_forecast()
 
 
 def sound_callback(channel):
@@ -107,7 +107,7 @@ def write_stuff_on_image(image, base_y, base_x):
         return cv2.putText(img=image, text="Hello User!", org=(base_y, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 0, 0), thickness=2)
     cv2.putText(img=image, text="Weather forecast:", org=(base_y, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=3, color=(0, 0, 0), thickness=2)
     for i, date in enumerate(weather_forecast.keys()):
-        cv2.putText(img=image, text=f"{date}: {weather_forecast[date][1]}°C\t{weather_forecast[date][0]}", org=(base_y + i * 100, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=2, color=(0, 0, 0), thickness=2)
+        cv2.putText(img=image, text="{}: {}°C\t{}".format(date, weather_forecast[date][1], weather_forecast[date][0]), org=(base_y + i * 100, base_x), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=2, color=(0, 0, 0), thickness=2)
         if i == 3:
             break
     return image
