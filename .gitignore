@@ -31,3 +31,8 @@ cmake-build-*/
 
 # File-based project format
 *.iws
+
+# Mine
+*.pyc
+*.xml
+*idea/
